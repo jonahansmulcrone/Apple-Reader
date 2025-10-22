@@ -1,6 +1,8 @@
 class SubtitlesController < ApplicationController
   def index
     client ||= LambdaClient.new
-    client.fetch_subtitles(params[:id])
+    subtitles = client.fetch_subtitles(params[:id])
+
+    render json: { subtitles: subtitles }
   end
 end
