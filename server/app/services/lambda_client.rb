@@ -5,7 +5,7 @@ require 'json'
 class LambdaClient
     def initialize
         set_credentials
-        aws_signer
+        setup_aws_signer
         
         @faraday = Faraday.new do |f|
             f.adapter Faraday.default_adapter
@@ -13,8 +13,7 @@ class LambdaClient
     end
 
     def fetch_subtitles(id)
-        base_url= ENV["LAMBDA_FUNCTION_URL"]
-        url = "#{base_url}?video_id=#{URI.encode_www_form_component(id)}"
+        url = build_url(id)
 
         signed_request = @signer.sign_request(
             http_method: 'GET',
@@ -35,6 +34,11 @@ class LambdaClient
     end
 
     private
+    def build_url(id)
+        base_url = ENV["LAMBDA_FUNCTION_URL"]
+        "#{base_url}?video_id=#{URI.encode_www_form_component(id)}"
+    end
+
     def set_credentials
         @credentials = {
             AWS_ACCESS_KEY: ENV["AWS_ACCESS_KEY"],
@@ -42,7 +46,7 @@ class LambdaClient
         }
     end
 
-    def aws_signer
+    def setup_aws_signer
         @signer = Aws::Sigv4::Signer.new(
             service: 'lambda',
             region: ENV['AWS_REGION'],
