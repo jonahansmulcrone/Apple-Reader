@@ -19,9 +19,13 @@
 
 // *********** Libraries ***********
 import { ref } from 'vue'
+import { useStore } from 'vuex'
+
 import { YOUTUBE_VIDEO_ID_LENGTH } from './config/constants'
 
 // *********** Variables ***********
+const store = useStore()
+
 const url = ref('')
 const videoId = ref('')
 
