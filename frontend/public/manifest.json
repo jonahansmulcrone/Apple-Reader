@@ -1,0 +1,21 @@
+{
+   "name": "apple-reader",
+   "version": "1.0",
+   "manifest_version": 3,
+   "action": {
+       "default_popup": "index.html"
+   },
+   "permissions": [
+       "activeTab"
+   ],
+   "background": {
+       "service_worker": "background/background.js"
+   },
+   "content_scripts": [
+    {
+      "matches": ["*://*.youtube.com/*"],
+      "js": ["content.js"],
+      "run_at": "document_end"
+    }
+  ]
+}

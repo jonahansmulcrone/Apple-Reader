@@ -5,7 +5,6 @@ import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
 import vueDevTools from 'vite-plugin-vue-devtools'
 
-// https://vite.dev/config/
 export default defineConfig({
   plugins: [
     vue(),
@@ -31,22 +30,9 @@ export default defineConfig({
   build: {
     rollupOptions: {
       input: {
-        popup: 'index.html',                      
-        content: 'src/main.ts',               
-        background: 'src/background/background.js',
+        popup: 'index.html',
       },
-      output: {
-        entryFileNames: (chunkInfo) => {
-          if (chunkInfo.name === 'content') {
-            return 'main.js';                   
-          }
-          if (chunkInfo.name === 'background') {
-            return 'background/background.js';
-          }
-          return '[name].js';
-        },
-      },
-      external: []
     },
+    minify: false,
   },
 })

@@ -8,15 +8,17 @@
   },
   "scripts": {
     "dev": "vite",
-    "build": "run-p type-check \"build-only {@}\" --",
+    "build": "npm run type-check && npm run build-only && npm run build-content",
     "preview": "vite preview",
     "build-only": "vite build",
+    "build-content": "vite build --config vite.content.config.ts",
     "type-check": "vue-tsc --build",
     "format": "prettier --write src/"
   },
   "dependencies": {
     "vite-plugin-static-copy": "^3.1.4",
-    "vue": "^3.5.22"
+    "vue": "^3.5.22",
+    "vuex": "^4.1.0"
   },
   "devDependencies": {
     "@tsconfig/node22": "^22.0.2",
