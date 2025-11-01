@@ -18,7 +18,7 @@
 // *********** Components ***********
 
 // *********** Libraries ***********
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
 import { useStore } from 'vuex'
 
 import { YOUTUBE_VIDEO_ID_LENGTH } from './config/constants'
@@ -31,15 +31,24 @@ const videoId = ref('')
 
 // *********** Methods ***********
 
+const subtitles = computed(() => store.getters['subtitles/subtitles'])
+const getSubtitlesForId = (videoId: string) => store.dispatch('subtitles/getSubtitlesForId', videoId)
+
 const getVideoId = () => {
-  chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-    if (tabs.length > 0) { 
-      url.value = tabs[0]?.url || ''
+  chrome.tabs.query({ active: true, currentWindow: true }, async (tabs) => {
+    if (tabs.length > 0 && tabs[0]?.id) { 
+      url.value = tabs[0].url || ''
       videoId.value = url.value.slice(YOUTUBE_VIDEO_ID_LENGTH)
+
+      await getSubtitlesForId(videoId.value)
+
+      chrome.tabs.sendMessage(tabs[0].id, { 
+        action: 'setSubtitles',
+        subtitles: subtitles.value
+      })
     }
   })
 }
-
 </script>
 
 <style scoped>

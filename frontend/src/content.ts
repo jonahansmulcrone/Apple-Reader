@@ -5,6 +5,12 @@ console.log('Apple Reader Content Script Loaded!')
 
 let appMounted = false
 
+chrome.runtime.onMessage.addListener((request, sender) => {
+  if (request.action === 'setSubtitles') {
+    console.log('Received subtitles from popup:', request.subtitles);
+  }
+});
+
 const injectVueComponent = () => {
     if (appMounted) {
         return

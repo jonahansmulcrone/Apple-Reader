@@ -1,7 +1,14 @@
 <template>
   <div :style="captionContainerStyle">
     <div :style="captionTextStyle">
-      {{ captionText }}
+      <div
+        :style="captionWordStyle"
+        v-for="(word, index) in captionText"
+        :key="index"
+        @click="processWord(word)"
+        >
+        {{ word }}
+      </div>
     </div>
   </div>
 </template>
@@ -9,7 +16,7 @@
 <script setup lang="ts">
 import { ref, type CSSProperties } from 'vue'
 
-const captionText = ref('Lorem Ipsum')
+const captionText = ref(['Lorem', 'Ipsum'])
 
 const captionContainerStyle: CSSProperties = {
   position: 'absolute',
@@ -25,12 +32,23 @@ const captionContainerStyle: CSSProperties = {
 const captionTextStyle: CSSProperties = {
   backgroundColor: 'rgba(0, 0, 0, 0.9)',
   color: 'white',
-  cursor: 'pointer',
-  pointerEvents: 'auto',
   padding: '20px 40px',
   fontSize: '24px',
   textAlign: 'center',
   borderRadius: '8px',
   lineHeight: '1.4',
+  display: 'flex',
+  flexDirection: 'row',
+  gap: '1rem',
 }
+
+const captionWordStyle: CSSProperties = {
+  cursor: 'pointer',
+  pointerEvents: 'auto',
+}
+
+const processWord = (word: string) => {
+  console.log(word)
+}
+
 </script>
