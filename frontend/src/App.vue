@@ -6,10 +6,7 @@
   </header>
 
   <main>
-    <button @click="getVideoId">Parse Video</button>
-
-    <div v-if="url">{{ url }}</div>
-    <div v-if="videoId">{{ videoId }}</div>
+    <button @click="parseSubtitles">Parse Subtitles</button>
   </main>
 </template>
 
@@ -18,33 +15,28 @@
 // *********** Components ***********
 
 // *********** Libraries ***********
-import { computed, ref } from 'vue'
-import { useStore } from 'vuex'
-
+import { ref } from 'vue'
 import { YOUTUBE_VIDEO_ID_LENGTH } from './config/constants'
 
-// *********** Variables ***********
-const store = useStore()
+// *********** Computed ***********
 
+// *********** Variables ***********
 const url = ref('')
 const videoId = ref('')
 
 // *********** Methods ***********
 
-const subtitles = computed(() => store.getters['subtitles/subtitles'])
-const getSubtitlesForId = (videoId: string) => store.dispatch('subtitles/getSubtitlesForId', videoId)
-
-const getVideoId = () => {
+const parseSubtitles = () => {
   chrome.tabs.query({ active: true, currentWindow: true }, async (tabs) => {
     if (tabs.length > 0 && tabs[0]?.id) { 
       url.value = tabs[0].url || ''
       videoId.value = url.value.slice(YOUTUBE_VIDEO_ID_LENGTH)
 
-      await getSubtitlesForId(videoId.value)
+      console.log(videoId.value, 'VIDEO ID')
 
       chrome.tabs.sendMessage(tabs[0].id, { 
-        action: 'setSubtitles',
-        subtitles: subtitles.value
+        action: 'PARSE_SUBTITLES',
+        videoId: videoId.value
       })
     }
   })

@@ -1,1 +1,1 @@
-export const SET_SUBTITLES = "set_subtitles"
+export const SET_SUBTITLES = "SET_SUBTITLES" 

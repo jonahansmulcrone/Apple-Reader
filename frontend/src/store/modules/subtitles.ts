@@ -1,5 +1,4 @@
 import * as t from '../mutations'
-import axios from 'axios'
 
 export default {
   namespaced: true,
@@ -14,20 +13,22 @@ export default {
 
   actions: {
     async getSubtitlesForId({ commit }: any, videoId: string) {
-        try {
-            const response = await axios.get(`http://localhost:3000/subtitles/${videoId}`)
-            console.log(response, 'Rails Server Response: ', response)
-            commit(t.SET_SUBTITLES, response.data)
-        } catch (error) {
-            console.error('An error occurred fetching subtitles: ', error)
+      chrome.runtime.sendMessage(
+        { action: "FETCH_SUBTITLES", videoId }, 
+        (response) => {
+          if (response?.success) {
+            commit(t.SET_SUBTITLES, response.data.subtitles)
+          } else {
+            console.error("Failed to fetch subtitles:", response?.error)
+          }
         }
+      )
     }
   },
 
   mutations: {
     [t.SET_SUBTITLES](state: any, subtitles: any) {
         state.subtitles = subtitles
-        console.log('Subtitles have been set in state: ', state.subtitles)
     }
   }
 }

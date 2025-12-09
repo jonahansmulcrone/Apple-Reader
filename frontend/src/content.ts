@@ -1,15 +1,16 @@
-import Subtitles from './components/Subtitles.vue'
+import Subtitles from './components/Subtitles/Subtitles.vue'
 import { createApp } from 'vue'
+import store from './store'
 
 console.log('Apple Reader Content Script Loaded!')
 
 let appMounted = false
 
-chrome.runtime.onMessage.addListener((request, sender) => {
-  if (request.action === 'setSubtitles') {
-    console.log('Received subtitles from popup:', request.subtitles);
+chrome.runtime.onMessage.addListener((msg) => {
+  if (msg.action === "PARSE_SUBTITLES") {    
+    store.dispatch("subtitles/getSubtitlesForId", msg.videoId)
   }
-});
+})
 
 const injectVueComponent = () => {
     if (appMounted) {
@@ -39,6 +40,7 @@ const injectVueComponent = () => {
         subsParentNode.appendChild(container)
     
         const app = createApp(Subtitles)
+        app.use(store)
         app.mount(container)
         
         appMounted = true
