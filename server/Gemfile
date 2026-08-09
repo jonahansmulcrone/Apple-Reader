@@ -48,9 +48,7 @@ group :development, :test do
   gem 'dotenv-rails'
 end
 
-# Faraday is an HTTP client library abstraction layer that provides a common interface over many adapters 
+# Faraday is an HTTP client library abstraction layer that provides a common interface over many adapters
 # and embraces the concept of Rack middleware when processing the request/response cycle.
 gem 'faraday'
-
-gem 'aws-sigv4'
 

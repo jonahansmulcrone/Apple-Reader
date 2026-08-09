@@ -1,6 +1,6 @@
 <template>
   <div :style="captionContainerStyle">
-    <div :style="captionTextStyle" v-if="subtitles.length">
+    <div :style="captionTextStyle" v-if="captionText.length">
       <div
         :style="captionWordStyle"
         v-for="(word, index) in captionText"
@@ -17,38 +17,83 @@
 // *********** Components ***********
 
 // *********** Libraries ***********
-import { computed, onMounted, ref, type CSSProperties } from 'vue'
+import { computed, onUnmounted, ref, watch, type CSSProperties } from 'vue'
 import { useStore } from 'vuex'
 
-const store = useStore()
+interface Subtitle {
+  start: number
+  duration: number
+  subtitle: string
+}
 
-// *********** Computed ***********
-const subtitles: any = computed(() => {
-  const subs = store.getters['subtitles/subtitles']
-  return subs
-})
+const store = useStore()
+let syncInterval: number | null = null
+let videoSearchAttempts = 0
+const MAX_VIDEO_SEARCH_ATTEMPTS = 10
 
 // *********** Variables ***********
-const captionText = computed(() => {
-  if (!subtitles.value || subtitles.value.length === 0) {
-    return []
-  }
-  
-  const firstValidSubtitle = subtitles.value.find((sub: any) => sub.subtitle !== null)
-  
-  if (!firstValidSubtitle || !firstValidSubtitle.subtitle) {
-    console.log('No valid subtitle found')
-    return []
-  }
-  
-  return firstValidSubtitle.subtitle.split(' ')
+const currentTime = ref(0)
+
+// *********** Computed ***********
+const subtitles = computed<Subtitle[]>(() => store.getters['subtitles/subtitles'] ?? [])
+
+// The subtitle whose time range contains the video's current playback time.
+const currentSubtitle = computed<Subtitle | null>(() => {
+  return (
+    subtitles.value.find(
+      (sub) => currentTime.value >= sub.start && currentTime.value < sub.start + sub.duration
+    ) ?? null
+  )
 })
+
+const captionText = computed(() => {
+  if (!currentSubtitle.value?.subtitle) {
+    return []
+  }
+
+  return currentSubtitle.value.subtitle.split(/\s+/).filter(Boolean)
+})
+
 // *********** Life Cycle Hooks ***********
 
+watch(subtitles, (newSubs) => {
+  if (newSubs && newSubs.length > 0) {
+    startVideoSync()
+  }
+})
+
+onUnmounted(() => {
+  if (syncInterval) clearInterval(syncInterval)
+})
 
 // *********** Methods ***********
 const processWord = (word: string) => {
   console.log('Processing word: ', word)
+}
+
+const startVideoSync = () => {
+  if (syncInterval) {
+    clearInterval(syncInterval)
+    syncInterval = null
+  }
+
+  const video: HTMLVideoElement | null = document.querySelector('video')
+
+  if (!video) {
+    // The captions can arrive before YouTube's video element has been
+    // inserted into the DOM, so retry a few times before giving up.
+    videoSearchAttempts++
+    if (videoSearchAttempts <= MAX_VIDEO_SEARCH_ATTEMPTS) {
+      setTimeout(startVideoSync, 500)
+    } else {
+      console.error('YouTube video element not found.')
+    }
+    return
+  }
+
+  syncInterval = window.setInterval(() => {
+    currentTime.value = video.currentTime
+  }, 200)
 }
 
 // *********** Styles ***********
@@ -73,6 +118,8 @@ const captionTextStyle: CSSProperties = {
   lineHeight: '1.4',
   display: 'flex',
   flexDirection: 'row',
+  flexWrap: 'wrap',
+  justifyContent: 'center',
   gap: '1rem',
 }
 

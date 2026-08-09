@@ -6,10 +6,10 @@ class SubtitlesController < ApplicationController
     end
 
     begin
-      client = LambdaClient.new
-      subtitles = client.fetch_subtitles(params[:id])
+      client = TranscriptClient.new
+      subtitles = client.fetch_transcript(params[:id])
       render json: { subtitles: subtitles }
-      
+
     rescue StandardError => e
       Rails.logger.error("Failed to fetch subtitles: #{e.message}")
       render json: { error: 'Failed to fetch subtitles' }, status: :internal_server_error

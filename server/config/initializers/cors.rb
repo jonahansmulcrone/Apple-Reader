@@ -7,10 +7,15 @@
 
 Rails.application.config.middleware.insert_before 0, Rack::Cors do
   allow do
-    origins "example.com"
+    # The extension calls this API from a background service worker, whose
+    # origin is "chrome-extension://<extension-id>". The id is stable per
+    # machine for an unpacked/dev-loaded extension but isn't known ahead of
+    # time, so we allow any chrome-extension origin. Once the extension is
+    # published with a fixed id, tighten this to that exact origin.
+    origins(/\Achrome-extension:\/\//)
 
-    resource "*",
+    resource "/subtitles/*",
       headers: :any,
-      methods: [:get, :post, :put, :patch, :delete, :options, :head]
+      methods: [:get, :options]
   end
 end
